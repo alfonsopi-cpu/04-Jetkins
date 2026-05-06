@@ -17,7 +17,7 @@ Instalo Docker para instalar jetkins dentro como un contenedor para ahorrar prob
 
 ´´´
 
-docker run -d   --name jenkins   -p 8080:8080   -p 50000:50000   -v jenkins_home:/var/jenkins_home   jenkins/jenkins:lts
+    docker run -d   --name jenkins   -p 8080:8080   -p 50000:50000   -v jenkins_home:/var/jenkins_home   jenkins/jenkins:lts
 
 ´´´
 
@@ -34,7 +34,7 @@ Compruebo que esta corriendo bien
 
 ´´´
 
-docker ps 
+    docker ps 
 
 ´´´
 
@@ -52,13 +52,12 @@ Nos falta esa password y la buscamos con
 Ejecuto 
 
 ´´´bash 
-docker logs jenkins
+        docker logs jenkins
 ´´´
 
 ![a](imgs/04-pass.jpg)
 
-    alfonsopi
-alfonsopi1
+
 
 ## 5. Instalamos jetkinsa
 la copiamos en localhost para proceder a la instalación
@@ -84,8 +83,9 @@ pero esa no nos sirve ya que le falta node
 Pero la imagen de jetkins que tenemos no tiene node asi que vamos a crear una nueva con el asi que paramos la maquina y la borramos pero dejamos la imagen que vamos a usar de base y el volumen 
 
 ```
-docker stop jenkins
-docker rm jenkins
+    docker stop jenkins
+
+    docker rm jenkins
 
 ```
 
@@ -122,14 +122,14 @@ USER jenkins
 Vamos a crear la imagen de jetkins + node y la llamamos jenkins-node
 
 ```
- docker build -t jenkins-node .
+    docker build -t jenkins-node .
 ```
 ![img](imgs/08-dockerfile.jpg)
 
 ## 8 Ejecutamos jetkins con node dentro 
 
 ```
-docker run -d   --name jenkins   -p 8080:8080   -p 50000:50000   -v jenkins_home:/var/jenkins_home   jenkins-node
+    docker run -d   --name jenkins   -p 8080:8080   -p 50000:50000   -v jenkins_home:/var/jenkins_home   jenkins-node
   
 ```
 ![a](imgs/09-dockerrun.jpg)
