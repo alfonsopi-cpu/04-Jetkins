@@ -2,7 +2,7 @@ import { Router as createRouter } from "express";
 import { recipesController } from "./recipes.controller";
 
 const router = createRouter();
-
+/* cambio para saltar jetkins  */
 router.get("/", recipesController.getRecipes);
 router.post("/", recipesController.createRecipe);
 router.get("/:id", recipesController.getRecipeById);

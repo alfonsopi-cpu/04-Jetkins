@@ -185,13 +185,37 @@ Podemos comprobar que todo ha ido bien en status que deberia salir algo asi y en
 El flujo funciona así cuando subos código a GitHub y Jenkins revisa automáticamente el repositorio buscando cambios. Cuando detecta una nueva versión del código (por ejemplo un commit en la rama main), ejecuta el Jenkinsfile, que contiene una serie de pasos automáticos llamados pipeline. En ese pipeline Jenkins comprueba que el proyecto funciona correctamente: instala dependencias, verifica el formato del código, analiza calidad, revisa tipos, ejecuta tests y finalmente genera la build de la aplicación. Si todo sale bien, guarda los artefactos generados (dist/server.mjs) y muestra un mensaje de éxito; si algo falla, detiene el proceso y muestra errores en los logs. 
 
 
+## 15 Probamos que esta bien instalado
+### Hago unos cambios 
 
+![a](imgs/18-cambio.jpg)
 
- ## 15 Resumen 
+### Hago  commit y push con los cambios 
 
+```
 
+git add .
+git commit -m "Test Jenkins pipeline"
+git push
 
+```
+![a](imgs/19-push-jk.jpg)
 
+### Solicito un Scan Multibranch Pipeline Now
 
+Voy a Jenkins → tu proyecto → rama main.
+Pulsa: Scan Multibranch Pipeline Now
+
+![a](imgs/20-sacn.jpg)
+
+## 16 Comprobamos Console output
+
+Pulso en  Console output de la ultima ejecucion 
+
+![a](imgs/21-consoleoutput.jpg)
+
+Compruebo que todo va bien
+
+![a](imgs/22-ok.jpg)
 
 
