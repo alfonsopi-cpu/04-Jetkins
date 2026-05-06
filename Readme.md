@@ -12,14 +12,111 @@ Jenkins se integra muy bien con GitHub porque puede conectarse a un repositorio 
 ## 1º Instalo Docker para instalar jetkins 
 Instalo Docker para instalar jetkins dentro como un contenedor para ahorrar problemas de configuracion de la maquina
 
+## 2º configuro el jetkinsfile
+
+Tengo que crear un jetkinsfile con todo lo que se me pide en la carpeta backend.
+Este fichero indica a jetkins que acciones deber realizar. 
+
+
+```
+
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+        timeout(time: 5, unit: 'MINUTES')
+    }
+
+    environment {
+        FORCE_COLOR = '0'
+        NO_COLOR = 'true'
+    }
+
+    stages {
+        stage('Audit tools') {
+            steps {
+                dir('backend') {
+                    sh 'node --version'
+                }
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                dir('backend') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Format check') {
+            steps {
+                dir('backend') {
+                    sh 'npm run format:check'
+                }
+            }
+        }
+
+        stage('Code quality') {
+            steps {
+                dir('backend') {
+                    sh 'npm run lint'
+                }
+            }
+        }
+
+        stage('Type check') {
+            steps {
+                dir('backend') {
+                    sh 'npm run type-check'
+                }
+            }
+        }
+
+        stage('Tests') {
+            steps {
+                dir('backend') {
+                    sh 'npm run test'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('backend') {
+                    sh 'npm run build'
+                    archiveArtifacts artifacts: 'dist/**', fingerprint: true
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed. Review logs.'
+        }
+
+        always {
+            cleanWs()
+        }
+    }
+}
+```
+
 
 ## 3. Ejecuto Jenkins en docker com este comando:
 
-´´´
+```
 
     docker run -d   --name jenkins   -p 8080:8080   -p 50000:50000   -v jenkins_home:/var/jenkins_home   jenkins/jenkins:lts
 
-´´´
+```
 
 
 -p 8080:8080 y  -p 50000:50000  Ppra los puertos
@@ -32,11 +129,11 @@ para que mi directorio jetkins este unido con el suyo
 
 Compruebo que esta corriendo bien 
 
-´´´
+```
 
     docker ps 
 
-´´´
+```
 
 ![a](imgs/02-docker-ps.jpg)
 
@@ -51,9 +148,10 @@ Nos falta esa password y la buscamos con
 
 Ejecuto 
 
-´´´bash 
+```bash 
         docker logs jenkins
-´´´
+        
+```
 
 ![a](imgs/04-pass.jpg)
 
