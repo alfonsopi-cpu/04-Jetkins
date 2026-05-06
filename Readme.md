@@ -16,39 +16,46 @@ Instalo Docker para instalar jetkins dentro como un contenedor para ahorrar prob
 ## 3. Ejecuto Jenkins en docker com este comando:
 
 ´´´
+
 docker run -d   --name jenkins   -p 8080:8080   -p 50000:50000   -v jenkins_home:/var/jenkins_home   jenkins/jenkins:lts
-´´´ 
+
+´´´
+
 
 -p 8080:8080 y  -p 50000:50000  Ppra los puertos
 -v jenkins_home:/var/jenkins_home   jenkins/jenkins:lts
 
 para que mi directorio jetkins este unido con el suyo
 
-01-docker-jetkins.jpg
-![alt text](image.png)
+![a](imgs/01-docker-jetkins.jpg)
+
 
 Compruebo que esta corriendo bien 
 
 ´´´
+
 docker ps 
+
 ´´´
-02-docker-ps.jpg
+
+![a](imgs/02-docker-ps.jpg)
 
 
 ## 3. Nos vamos al localhost de jetkins 
 
-03-localhost-jetk.jpg
+![a](imgs/03-localhost-jetk.jpg)
 
 Nos falta esa password y la buscamos con 
 
 ## 4. Obtener contraseña inicial
 
-Ejecuta: 
-´´´
+Ejecuto 
+
+´´´bash 
 docker logs jenkins
 ´´´
 
-04-pass
+![a](imgs/04-pass.jpg)
 
     alfonsopi
 alfonsopi1
@@ -61,14 +68,13 @@ la copiamos en localhost para proceder a la instalación
 
 ## 6. Creamos usuario
 
-07-usuario.jpg
+![a](imgs/07-usuario.jpg)
 
 Genial ya tenemos la configuracion en los volumenes 
 
 -v jenkins_home:/var/jenkins_home   jenkins/jenkins:lts
 
 pero esa no nos sirve ya que le falta node 
-
 
 
 
@@ -181,7 +187,7 @@ El flujo funciona así cuando subos código a GitHub y Jenkins revisa automátic
 
 
 
-
+ ## 15 Resumen 
 
 
 
