@@ -109,6 +109,516 @@ pipeline {
 }
 ```
 
+## Explicacion de cada punto del fichero jenkinsfile
+
+
+---
+
+## 1. `pipeline { ... }`
+
+  ```
+pipeline {
+```
+
+Define el inicio de una **pipeline declarativa**.
+
+Una pipeline es una secuencia automatizada de tareas que Jenkins ejecuta.
+
+---
+
+## 2. `agent any`
+
+  ```
+agent any
+```
+
+Indica dónde se ejecutará la pipeline.
+
+### Opciones comunes
+
+| Opción           | Significado                                |
+| ---------------- | ------------------------------------------ |
+| `any`            | Puede ejecutarse en cualquier nodo Jenkins |
+| `none`           | No asigna nodo automáticamente             |
+| `label 'linux'`  | Solo en agentes con esa etiqueta           |
+| `docker { ... }` | Ejecuta dentro de un contenedor Docker     |
+
+En tu caso:
+
+  ```
+agent any
+```
+
+➡ Jenkins puede usar cualquier agente disponible.
+
+---
+
+## 3. `options`
+
+  ```
+options {
+    disableConcurrentBuilds()
+    timestamps()
+    timeout(time: 5, unit: 'MINUTES')
+}
+```
+
+Son configuraciones globales del pipeline.
+
+---
+
+### `disableConcurrentBuilds()`
+
+  ```
+disableConcurrentBuilds()
+```
+
+Evita que dos ejecuciones del mismo pipeline ocurran al mismo tiempo.
+
+#### Ejemplo
+
+Si alguien hace dos commits rápidos:
+
+* Build #15 empieza
+* Build #16 espera a que termine #15
+
+Muy útil para evitar:
+
+* conflictos
+* despliegues simultáneos
+* corrupción de artefactos
+
+---
+
+### `timestamps()`
+
+  ```
+timestamps()
+```
+
+Añade hora a cada línea del log.
+
+#### Sin timestamps
+
+```text
+Running tests...
+Build complete
+```
+
+#### Con timestamps
+
+```text
+[12:01:02] Running tests...
+[12:01:40] Build complete
+```
+
+Muy útil para debugging.
+
+---
+
+### `timeout(...)`
+
+  ```
+timeout(time: 5, unit: 'MINUTES')
+```
+
+Cancela la pipeline si tarda más de 5 minutos.
+
+Protege Jenkins de:
+
+* builds colgados
+* tests infinitos
+* procesos bloqueados
+
+---
+
+## 4. `environment`
+
+  ```
+environment {
+    FORCE_COLOR = '0'
+    NO_COLOR = 'true'
+}
+```
+
+Define variables de entorno globales.
+
+---
+
+### `FORCE_COLOR = '0'`
+
+Desactiva colores ANSI en herramientas Node.js.
+
+---
+
+### `NO_COLOR = 'true'`
+
+También deshabilita colores en la salida.
+
+#### ¿Por qué?
+
+Porque los logs Jenkins a veces muestran caracteres raros con colores ANSI.
+
+---
+
+## 5. `stages`
+
+  ```
+stages {
+```
+
+Aquí defines las fases del pipeline.
+
+Cada `stage` representa un paso lógico.
+
+---
+
+## 6. Stage: Audit tools
+
+  ```
+stage('Audit tools') {
+```
+
+Comprueba herramientas instaladas.
+
+---
+
+### `dir('backend')`
+
+  ```
+dir('backend') {
+```
+
+Cambia temporalmente al directorio `backend`.
+
+Equivalente a:
+
+```bash
+cd backend
+```
+
+---
+
+### `sh 'node --version'`
+
+  ```
+sh 'node --version'
+```
+
+Ejecuta un comando shell Linux.
+
+Aquí imprime la versión de Node.js.
+
+---
+
+## 7. Install dependencies
+
+  ```
+sh 'npm install'
+```
+
+Instala dependencias desde `package.json`.
+
+Genera:
+
+* `node_modules`
+* dependencias necesarias para build/test
+
+---
+
+## 8. Format check
+
+  ```
+sh 'npm run format:check'
+```
+
+Normalmente ejecuta Prettier o similar.
+
+Verifica formato del código.
+
+Ejemplo:
+
+* espacios
+* indentación
+* comillas
+* saltos de línea
+
+No modifica archivos; solo valida.
+
+---
+
+## 9. Code quality
+
+  ```
+sh 'npm run lint'
+```
+
+Ejecuta el linter (normalmente ESLint).
+
+Busca:
+
+* errores potenciales
+* malas prácticas
+* variables no usadas
+* imports incorrectos
+
+---
+
+## 10. Type check
+
+  ```
+sh 'npm run type-check'
+```
+
+Verifica tipos TypeScript sin compilar.
+
+Muy común en proyectos TS.
+
+Detecta:
+
+* tipos incompatibles
+* funciones incorrectas
+* objetos mal definidos
+
+---
+
+## 11. Tests
+
+  ```
+sh 'npm run test'
+```
+
+Ejecuta tests automáticos.
+
+Puede usar:
+
+* Jest
+* Vitest
+* Mocha
+* etc.
+
+Si falla un test:
+
+➡ la pipeline falla.
+
+---
+
+## 12. Build
+
+  ```
+sh 'npm run build'
+```
+
+Compila la aplicación.
+
+Ejemplo:
+
+* TypeScript → JavaScript
+* empaquetado frontend
+* generación de `dist/`
+
+---
+
+## 13. `archiveArtifacts`
+
+  ```
+archiveArtifacts artifacts: 'dist/**', fingerprint: true
+```
+
+Guarda artefactos generados.
+
+---
+
+### `artifacts: 'dist/**'`
+
+Archiva todo dentro de `dist`.
+
+Ejemplo:
+
+```text
+dist/
+  app.js
+  bundle.js
+```
+
+---
+
+### `fingerprint: true`
+
+Genera hashes únicos de archivos.
+
+Sirve para:
+
+* trazabilidad
+* detectar cambios
+* relacionar builds
+
+---
+
+## 14. `post`
+
+  ```
+post {
+```
+
+Acciones que se ejecutan al finalizar la pipeline.
+
+---
+
+## 15. `success`
+
+  ```
+success {
+    echo 'Pipeline completed successfully!'
+}
+```
+
+Se ejecuta si TODO fue bien.
+
+---
+
+## 16. `failure`
+
+  ```
+failure {
+    echo 'Pipeline failed. Review logs.'
+}
+```
+
+Se ejecuta si algo falla.
+
+---
+
+## 17. `always`
+
+  ```
+always {
+    cleanWs()
+}
+```
+
+Se ejecuta siempre.
+
+---
+
+### `cleanWs()`
+
+Limpia workspace Jenkins.
+
+Borra:
+
+* node_modules
+* dist
+* archivos temporales
+
+Evita problemas entre builds.
+
+---
+
+## Flujo completo del pipeline
+
+El orden real es:
+
+```text
+1. Elegir agente Jenkins
+2. Aplicar opciones
+3. Definir variables entorno
+4. Audit tools
+5. npm install
+6. format check
+7. lint
+8. type-check
+9. tests
+10. build
+11. guardar artifacts
+12. success/failure
+13. limpiar workspace
+```
+
+---
+
+## Qué está validando esta pipeline
+
+Tu pipeline está siguiendo una estrategia típica de CI moderna:
+
+```text
+Código correcto →
+Formato correcto →
+Lint correcto →
+Tipos correctos →
+Tests correctos →
+Build correcto
+```
+
+Si cualquier paso falla:
+
+➡ Jenkins detiene la pipeline.
+
+---
+
+## Posibles mejoras habituales
+
+Algunas mejoras comunes serían:
+
+### Cache de npm
+
+  ```
+npm ci
+```
+
+en lugar de:
+
+  ```
+npm install
+```
+
+Más rápido y reproducible.
+
+---
+
+### Publicar resultados de tests
+
+  ```
+junit 'reports/*.xml'
+```
+
+---
+
+### Ejecutar stages en paralelo
+
+Ejemplo:
+
+* lint
+* type-check
+* tests
+
+al mismo tiempo.
+
+---
+
+### Docker
+
+Ejecutar en entorno reproducible:
+
+  ```
+agent {
+    docker {
+        image 'node:20'
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 3. Ejecuto Jenkins en docker com este comando:
 
